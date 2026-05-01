@@ -148,8 +148,6 @@ You can use the following credentials for testing:
 
 ## 📸 Screenshots 
 
-Add screenshots like this:
-
 ### Dashboard
 
 ![Dashboard](https://github.com/NivedhReddy2048/team-task-manager/blob/main/dashboard.png?raw=true)
