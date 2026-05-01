@@ -160,7 +160,7 @@ Add screenshots like this:
 
 ### Task Management
 
-![Tasks](screenshots/tasks.png)
+![Tasks](https://github.com/NivedhReddy2048/team-task-manager/blob/main/taskmanagement.png?raw=true)
 
 > 📌 Create a folder named `screenshots/` and place images inside it.
 
