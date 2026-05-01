@@ -1,0 +1,171 @@
+{% extends 'core/base.html' %}
+{% block title %}Dashboard – Task Manager{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1 class="h3 mb-0">
+        <i class="bi bi-speedometer2 text-primary"></i>
+        Dashboard
+        {% if user.is_admin %}
+        <span class="badge bg-danger ms-2">Admin View</span>
+        {% else %}
+        <span class="badge bg-secondary ms-2">My Tasks</span>
+        {% endif %}
+    </h1>
+    {% if user.is_admin %}
+    <div>
+        <a href="{% url 'project_create' %}" class="btn btn-outline-primary me-2">
+            <i class="bi bi-folder-plus"></i> New Project
+        </a>
+        <a href="{% url 'task_create' %}" class="btn btn-primary">
+            <i class="bi bi-plus-circle"></i> New Task
+        </a>
+    </div>
+    {% endif %}
+</div>
+
+<!-- Stats Row -->
+<div class="row g-3 mb-4">
+    <div class="col-sm-6 col-md-3">
+        <div class="card text-center border-0 shadow-sm">
+            <div class="card-body">
+                <div class="display-6 fw-bold text-primary">{{ total }}</div>
+                <div class="text-muted small">Total Tasks</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-6 col-md-3">
+        <div class="card text-center border-0 shadow-sm">
+            <div class="card-body">
+                <div class="display-6 fw-bold text-info">{{ in_progress }}</div>
+                <div class="text-muted small">In Progress</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-6 col-md-3">
+        <div class="card text-center border-0 shadow-sm">
+            <div class="card-body">
+                <div class="display-6 fw-bold text-success">{{ completed }}</div>
+                <div class="text-muted small">Completed</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-6 col-md-3">
+        <div class="card text-center border-0 shadow-sm">
+            <div class="card-body">
+                <div class="display-6 fw-bold text-danger">{{ overdue }}</div>
+                <div class="text-muted small">Overdue</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% if user.is_admin and projects %}
+<!-- Projects List (Admin only) -->
+<div class="card shadow-sm mb-4">
+    <div class="card-header bg-white fw-semibold">
+        <i class="bi bi-folder2-open text-primary"></i> Projects
+    </div>
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th>Name</th>
+                        <th>Description</th>
+                        <th>Created By</th>
+                        <th>Created At</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for project in projects %}
+                    <tr>
+                        <td>{{ project.name }}</td>
+                        <td class="text-muted">{{ project.description|truncatechars:60 }}</td>
+                        <td>{{ project.created_by.username }}</td>
+                        <td>{{ project.created_at|date:"M d, Y" }}</td>
+                        <td>
+                            <a href="{% url 'project_detail' project.pk %}" class="btn btn-sm btn-outline-primary">
+                                View
+                            </a>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr><td colspan="5" class="text-center text-muted py-3">No projects yet.</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<!-- Tasks Table -->
+<div class="card shadow-sm">
+    <div class="card-header bg-white fw-semibold">
+        <i class="bi bi-list-task text-primary"></i> Tasks
+    </div>
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th>Title</th>
+                        <th>Project</th>
+                        <th>Assigned To</th>
+                        <th>Status</th>
+                        <th>Due Date</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for task in tasks %}
+                    <tr {% if task.is_overdue %}class="table-danger"{% endif %}>
+                        <td>{{ task.title }}</td>
+                        <td>
+                            <a href="{% url 'project_detail' task.project.pk %}">{{ task.project.name }}</a>
+                        </td>
+                        <td>{{ task.assigned_to.username|default:"Unassigned" }}</td>
+                        <td>
+                            {% if task.status == 'Completed' %}
+                                <span class="badge bg-success">{{ task.status }}</span>
+                            {% elif task.status == 'In Progress' %}
+                                <span class="badge bg-info text-dark">{{ task.status }}</span>
+                            {% else %}
+                                <span class="badge bg-secondary">{{ task.status }}</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {{ task.due_date|date:"M d, Y"|default:"—" }}
+                            {% if task.is_overdue %}
+                                <span class="badge bg-danger ms-1">Overdue</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if user.is_admin or task.assigned_to == user %}
+                            <a href="{% url 'task_update' task.pk %}" class="btn btn-sm btn-outline-secondary">
+                                {% if user.is_admin %}Edit{% else %}Update Status{% endif %}
+                            </a>
+                            {% else %}
+                            <span class="text-muted small">—</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="6" class="text-center text-muted py-4">
+                            {% if user.is_admin %}
+                            No tasks yet. <a href="{% url 'task_create' %}">Create one</a>.
+                            {% else %}
+                            No tasks assigned to you yet.
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

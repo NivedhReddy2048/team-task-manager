@@ -1,0 +1,92 @@
+{% extends 'core/base.html' %}
+{% block title %}{{ project.name }} – Task Manager{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb mb-1">
+                <li class="breadcrumb-item"><a href="{% url 'dashboard' %}">Dashboard</a></li>
+                <li class="breadcrumb-item active">{{ project.name }}</li>
+            </ol>
+        </nav>
+        <h1 class="h3 mb-0">
+            <i class="bi bi-folder2-open text-primary"></i> {{ project.name }}
+        </h1>
+        {% if project.description %}
+        <p class="text-muted mt-1 mb-0">{{ project.description }}</p>
+        {% endif %}
+    </div>
+    {% if user.is_admin %}
+    <a href="{% url 'task_create' %}" class="btn btn-primary">
+        <i class="bi bi-plus-circle"></i> Add Task
+    </a>
+    {% endif %}
+</div>
+
+<div class="card shadow-sm">
+    <div class="card-header bg-white fw-semibold">
+        <i class="bi bi-list-task text-primary"></i> Tasks in this Project
+        <span class="badge bg-primary ms-2">{{ tasks.count }}</span>
+    </div>
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th>Title</th>
+                        <th>Assigned To</th>
+                        <th>Status</th>
+                        <th>Due Date</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for task in tasks %}
+                    <tr {% if task.is_overdue %}class="table-danger"{% endif %}>
+                        <td>{{ task.title }}</td>
+                        <td>{{ task.assigned_to.username|default:"Unassigned" }}</td>
+                        <td>
+                            {% if task.status == 'Completed' %}
+                                <span class="badge bg-success">{{ task.status }}</span>
+                            {% elif task.status == 'In Progress' %}
+                                <span class="badge bg-info text-dark">{{ task.status }}</span>
+                            {% else %}
+                                <span class="badge bg-secondary">{{ task.status }}</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {{ task.due_date|date:"M d, Y"|default:"—" }}
+                            {% if task.is_overdue %}
+                                <span class="badge bg-danger ms-1">Overdue</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if user.is_admin or task.assigned_to == user %}
+                            <a href="{% url 'task_update' task.pk %}" class="btn btn-sm btn-outline-secondary">
+                                {% if user.is_admin %}Edit{% else %}Update Status{% endif %}
+                            </a>
+                            {% else %}
+                            <span class="text-muted small">—</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="5" class="text-center text-muted py-4">
+                            No tasks in this project yet.
+                            {% if user.is_admin %}
+                            <a href="{% url 'task_create' %}">Create one</a>.
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <div class="card-footer text-muted small">
+        Created by <strong>{{ project.created_by.username }}</strong> on {{ project.created_at|date:"M d, Y" }}
+    </div>
+</div>
+{% endblock %}
