@@ -1,1 +1,1 @@
-web: gunicorn task_manager.wsgi --log-file -
+web: gunicorn task_manager.wsgi --bind 0.0.0.0:$PORT --workers 2 --log-file -

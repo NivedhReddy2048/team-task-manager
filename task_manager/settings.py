@@ -11,7 +11,9 @@ SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-change-me-in-producti
 
 DEBUG = os.environ.get('DEBUG', 'True') == 'True'
 
-ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', 'localhost,127.0.0.1').split(',')
+# Accept any host — Railway auto-assigns *.up.railway.app domains.
+# Lock this down to your exact domain once deployed if you prefer.
+ALLOWED_HOSTS = ['*']
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -58,7 +60,11 @@ WSGI_APPLICATION = 'task_manager.wsgi.application'
 # Database: SQLite locally, PostgreSQL on Railway via DATABASE_URL
 DATABASE_URL = os.environ.get('DATABASE_URL', f'sqlite:///{BASE_DIR / "db.sqlite3"}')
 DATABASES = {
-    'default': dj_database_url.parse(DATABASE_URL, conn_max_age=600)
+    'default': dj_database_url.parse(
+        DATABASE_URL,
+        conn_max_age=600,
+        conn_health_checks=True,  # Recover automatically after Railway sleeps
+    )
 }
 
 AUTH_PASSWORD_VALIDATORS = [
@@ -76,7 +82,29 @@ USE_TZ = True
 # Static files
 STATIC_URL = '/static/'
 STATIC_ROOT = BASE_DIR / 'staticfiles'
-STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+
+# Django 4.2+: use STORAGES dict instead of the deprecated STATICFILES_STORAGE
+STORAGES = {
+    'default': {
+        'BACKEND': 'django.core.files.storage.FileSystemStorage',
+    },
+    'staticfiles': {
+        'BACKEND': 'whitenoise.storage.CompressedManifestStaticFilesStorage',
+    },
+}
+
+# ── Production-only security hardening ────────────────────────────────────────
+# These are automatically disabled in local development (DEBUG=True).
+if not DEBUG:
+    SECURE_SSL_REDIRECT = True           # Force HTTPS
+    SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')  # Trust Railway proxy
+    SESSION_COOKIE_SECURE = True         # Send session cookie over HTTPS only
+    CSRF_COOKIE_SECURE = True            # Send CSRF cookie over HTTPS only
+    SECURE_HSTS_SECONDS = 31536000       # 1 year HSTS
+    SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+    SECURE_HSTS_PRELOAD = True
+    SECURE_BROWSER_XSS_FILTER = True
+    X_FRAME_OPTIONS = 'DENY'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
