@@ -152,7 +152,7 @@ Add screenshots like this:
 
 ### Dashboard
 
-![Dashboard](screenshots/dashboard.png)
+![Dashboard](https://github.com/NivedhReddy2048/team-task-manager/blob/main/dashboard.png?raw=true)
 
 ### Project View
 
