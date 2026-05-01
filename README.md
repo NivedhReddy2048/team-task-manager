@@ -146,7 +146,7 @@ You can use the following credentials for testing:
 
 ---
 
-## 📸 Screenshots (Recommended)
+## 📸 Screenshots 
 
 Add screenshots like this:
 
@@ -156,13 +156,13 @@ Add screenshots like this:
 
 ### Project View
 
-![Project](screenshots/project.png)
+![Project](https://github.com/NivedhReddy2048/team-task-manager/blob/main/projectview.png?raw=true)
 
 ### Task Management
 
 ![Tasks](https://github.com/NivedhReddy2048/team-task-manager/blob/main/taskmanagement.png?raw=true)
 
-> 📌 Create a folder named `screenshots/` and place images inside it.
+
 
 ---
 
